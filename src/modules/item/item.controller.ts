@@ -7,14 +7,16 @@ import {
   Param,
   Put,
 } from '@nestjs/common';
-import { CosmosService } from './cosmos.service';
+import { ItemService } from './item.service';
 
 @Controller('items')
 export class ItemsController {
-  constructor(private readonly cosmosService: CosmosService) {}
+  constructor(private readonly cosmosService: ItemService) {}
 
   @Get()
   findAll() {
+    console.log('Fetching all items from Cosmos DB');
+    // This log is for debugging purposes to ensure the method is called
     return this.cosmosService.findAll();
   }
 

@@ -9,6 +9,7 @@
     "typescript",
     "typescriptreact"
   ],
-  "prettier.enable": true,
-  "singleQuote": false
+  "prettier.enable": false,
+  "singleQuote": false,
+  "eslint.enable": false
 }

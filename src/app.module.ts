@@ -1,10 +1,17 @@
 import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
+import { ItemModule } from "./modules/item/item.module";
+import { ConfigModule } from "@nestjs/config";
+import appConfig from "./config/app.config";
+import azureConfig from "./config/azure.config";
 
 @Module({
-  imports: [],
-  controllers: [AppController],
-  providers: [AppService],
+  imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,
+      load: [appConfig, azureConfig],
+      envFilePath: ['.env'],
+    }),
+    ItemModule
+  ],
 })
 export class AppModule {}
