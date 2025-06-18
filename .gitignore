@@ -60,3 +60,5 @@ report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 .terraform/
 *.tfstate
 *.tfstate.backup
+infa/terraform/.terraform.lock.hcl
+infa/terraform/.terraform.tfstate.lock.info
