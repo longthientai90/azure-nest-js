@@ -11,5 +11,10 @@
   ],
   "prettier.enable": false,
   "singleQuote": false,
-  "eslint.enable": false
+  "eslint.enable": false,
+  "cSpell.words": [
+    "eastus",
+    "vnet",
+    "zenblog"
+  ]
 }
