@@ -1,7 +1,8 @@
 import { Inject, Injectable, Scope } from '@nestjs/common';
-import { ContainerName, CosmosDbService } from '../cosmos-db/cosmos-db.service';
+import { CosmosDbService } from '../cosmos-db/cosmos-db.service';
 import { ConfigService } from "@nestjs/config";
 import { REQUEST } from "@nestjs/core";
+import { ContainerName } from "../cosmos-db/cosmos-db.const";
 
 @Injectable({ scope: Scope.REQUEST })
 export class ItemService {
@@ -19,6 +20,13 @@ export class ItemService {
   async findAll() {
     const { resources } = await this.container.items
       .query('SELECT * FROM c')
+      .fetchAll();
+    return resources;
+  }
+
+    async findById(id) {
+    const { resources } = await this.container.items
+      .query('SELECT * FROM c WHERE c.id = @id')
       .fetchAll();
     return resources;
   }
