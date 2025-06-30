@@ -7,9 +7,24 @@ from pathlib import Path
 
 
 class TerraformService:
-    def __init__(self, template_dir="terraform-modules/templates", workspace_dir="terraform-workspaces"):
+    def __init__(self, template_dir="../terraform-modules/templates", workspace_dir="terraform-workspaces"):
         self.template_dir = template_dir
         self.workspace_dir = workspace_dir
+        
+        # Resolve absolute paths
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        self.template_dir = os.path.join(current_dir, template_dir)
+        self.workspace_dir = os.path.join(current_dir, workspace_dir)
+        
+        print(f"🔍 Template directory: {self.template_dir}")
+        print(f"🔍 Workspace directory: {self.workspace_dir}")
+        
+        # Check if template directory exists
+        if not os.path.exists(self.template_dir):
+            print(f"⚠️  Template directory not found: {self.template_dir}")
+            print("Creating template directory...")
+            os.makedirs(self.template_dir, exist_ok=True)
+        
         self.jinja_env = jinja2.Environment(
             loader=jinja2.FileSystemLoader(self.template_dir),
             trim_blocks=True,
