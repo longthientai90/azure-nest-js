@@ -1,0 +1,423 @@
+Dự án của tôi như sau 1.tạo cơ sở hạ tầng cho nhiều công ty trên azure, kiểu multi tenant độc lập về mặt vật lý, sử dụng terraform 2.có 1 ứng web, khi click vào button thì sẽ tạo hạ tầng cho một công ty 3.hạ tầng của một công ty bao gồm: - 1 app container chạy api, 1 container chạy web - 1 azure postgresql, 1 blob storage, 1 Azure AI, 1 cdn - 1 vpc, 2 subnet (1 public, 1 private), 1 nat (đính kèm vào public subnet) Theo tôi hiểu thì khi user click trên web quảng lý thì call api, truyền vào các thông tin rồi chạy terraform. sau khi chạy xong terraform cần lưu lại các thông tin output
+
+bạn có thể thiết kế kiến trúc cho tôi được không
+
+# Kiến trúc Multi-Tenant Infrastructure Provisioning
+
+## 1. Tổng quan kiến trúc
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                    Management Layer                             │
+├─────────────────────────────────────────────────────────────────┤
+│  Web UI (React/Vue)  │  Management API (Node.js/Python)        │
+│  - Company Manager   │  - Provision API                        │
+│  - Dashboard         │  - Status Tracking                      │
+│  - Monitoring        │  - Resource Management                  │
+└─────────────────┬───────────────────────────────────────────────┘
+                  │
+┌─────────────────▼───────────────────────────────────────────────┐
+│                 Orchestration Layer                             │
+├─────────────────────────────────────────────────────────────────┤
+│  Queue System        │  Terraform Engine    │  State Management │
+│  - Azure Service Bus │  - Terraform Runner   │  - Remote Backend │
+│  - Job Queue         │  - Module Manager     │  - State Locking  │
+│  - Status Updates    │  - Output Handler     │  - Backup         │
+└─────────────────┬───────────────────────────────────────────────┘
+                  │
+┌─────────────────▼───────────────────────────────────────────────┐
+│                   Storage Layer                                 │
+├─────────────────────────────────────────────────────────────────┤
+│  Metadata DB         │  Terraform States    │  Configuration    │
+│  - Company Info      │  - Azure Storage     │  - Templates      │
+│  - Resource Mapping  │  - State Files       │  - Variables      │
+│  - Audit Logs        │  - Lock Files        │  - Secrets        │
+└─────────────────┬───────────────────────────────────────────────┘
+                  │
+┌─────────────────▼───────────────────────────────────────────────┐
+│                 Azure Resources (Per Tenant)                   │
+├─────────────────────────────────────────────────────────────────┤
+│  Resource Group: company-{tenant-id}-rg                        │
+│  ┌─────────────────────────────────────────────────────────────┐ │
+│  │ Network Infrastructure                                     │ │
+│  │ - VNet: company-{tenant-id}-vnet                          │ │
+│  │ - Public Subnet: company-{tenant-id}-public-subnet       │ │
+│  │ - Private Subnet: company-{tenant-id}-private-subnet     │ │
+│  │ - NAT Gateway: company-{tenant-id}-nat                    │ │
+│  │ - Network Security Groups                                 │ │
+│  └─────────────────────────────────────────────────────────────┘ │
+│  ┌─────────────────────────────────────────────────────────────┐ │
+│  │ Application Infrastructure                                 │ │
+│  │ - Container Apps Environment                               │ │
+│  │ - API Container App                                        │ │
+│  │ - Web Container App                                        │ │
+│  │ - Application Gateway / Load Balancer                     │ │
+│  └─────────────────────────────────────────────────────────────┘ │
+│  ┌─────────────────────────────────────────────────────────────┐ │
+│  │ Data & Storage Services                                    │ │
+│  │ - PostgreSQL Flexible Server                              │ │
+│  │ - Blob Storage Account                                     │ │
+│  │ - Azure AI Services                                        │ │
+│  │ - CDN Profile & Endpoint                                   │ │
+│  └─────────────────────────────────────────────────────────────┘ │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+## 2. Thành phần chi tiết
+
+### 2.1 Management Layer
+
+#### Web UI
+- **Framework**: React/Vue.js với TypeScript
+- **Features**:
+  - Dashboard quản lý companies
+  - Form tạo company mới
+  - Monitoring resources
+  - View logs và status
+  - Resource cost tracking
+
+#### Management API
+- **Framework**: Node.js (Express) hoặc Python (FastAPI)
+- **Endpoints**:
+  ```
+  POST /api/companies/provision
+  GET  /api/companies/{id}/status
+  GET  /api/companies/{id}/resources
+  DELETE /api/companies/{id}
+  GET  /api/companies/{id}/logs
+  ```
+
+### 2.2 Orchestration Layer
+
+#### Queue System
+- **Azure Service Bus** hoặc **Azure Storage Queue**
+- **Job Types**:
+  - Provision Infrastructure
+  - Update Infrastructure  
+  - Destroy Infrastructure
+  - Health Check
+
+#### Terraform Engine
+- **Terraform Runner Service**:
+  - Containerized Terraform execution
+  - Template rendering với Jinja2/Handlebars
+  - Output parsing và storage
+  - Error handling và rollback
+
+#### State Management
+- **Remote Backend**: Azure Storage Account
+- **State File Structure**:
+  ```
+  terraform-states/
+  ├── companies/
+  │   ├── {company-id}/
+  │   │   ├── terraform.tfstate
+  │   │   ├── terraform.tfstate.backup
+  │   │   └── .terraform.lock.hcl
+  ```
+
+### 2.3 Storage Layer
+
+#### Metadata Database
+- **Azure Database for PostgreSQL**
+- **Schema**:
+  ```sql
+  -- Companies table
+  CREATE TABLE companies (
+    id UUID PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    slug VARCHAR(100) UNIQUE NOT NULL,
+    status ENUM('provisioning', 'active', 'failed', 'destroying'),
+    created_at TIMESTAMP,
+    updated_at TIMESTAMP,
+    config JSONB
+  );
+
+  -- Resources table
+  CREATE TABLE resources (
+    id UUID PRIMARY KEY,
+    company_id UUID REFERENCES companies(id),
+    resource_type VARCHAR(100),
+    resource_name VARCHAR(255),
+    azure_resource_id VARCHAR(500),
+    status VARCHAR(50),
+    properties JSONB,
+    created_at TIMESTAMP
+  );
+
+  -- Provision logs
+  CREATE TABLE provision_logs (
+    id UUID PRIMARY KEY,
+    company_id UUID REFERENCES companies(id),
+    job_id UUID,
+    level ENUM('info', 'warning', 'error'),
+    message TEXT,
+    terraform_output JSONB,
+    created_at TIMESTAMP
+  );
+  ```
+
+## 3. Terraform Module Structure
+
+```
+terraform-modules/
+├── main.tf                 # Root module
+├── variables.tf           # Input variables
+├── outputs.tf            # Output values
+├── versions.tf           # Provider versions
+├── modules/
+│   ├── networking/       # VNet, Subnets, NAT
+│   ├── compute/         # Container Apps
+│   ├── database/        # PostgreSQL
+│   ├── storage/         # Blob Storage
+│   ├── ai/              # Azure AI Services
+│   └── cdn/             # CDN configuration
+└── templates/
+    ├── company.tf.j2    # Jinja2 template
+    └── terraform.tfvars.j2
+```
+
+### Sample Terraform Template (company.tf.j2)
+```hcl
+# Resource Group
+resource "azurerm_resource_group" "company" {
+  name     = "{{ company_slug }}-rg"
+  location = "{{ azure_region }}"
+  
+  tags = {
+    Company = "{{ company_name }}"
+    Environment = "{{ environment }}"
+    ManagedBy = "terraform"
+  }
+}
+
+# Networking Module
+module "networking" {
+  source = "./modules/networking"
+  
+  company_slug    = "{{ company_slug }}"
+  resource_group  = azurerm_resource_group.company
+  vnet_cidr      = "{{ vnet_cidr | default('10.0.0.0/16') }}"
+}
+
+# Database Module  
+module "database" {
+  source = "./modules/database"
+  
+  company_slug         = "{{ company_slug }}"
+  resource_group       = azurerm_resource_group.company
+  subnet_id           = module.networking.private_subnet_id
+  admin_username      = "{{ db_admin_username }}"
+  admin_password      = "{{ db_admin_password }}"
+}
+
+# Container Apps Module
+module "compute" {
+  source = "./modules/compute"
+  
+  company_slug    = "{{ company_slug }}"
+  resource_group  = azurerm_resource_group.company
+  subnet_id      = module.networking.private_subnet_id
+  
+  api_image = "{{ api_container_image }}"
+  web_image = "{{ web_container_image }}"
+}
+```
+
+## 4. API Flow
+
+### 4.1 Provision Company Infrastructure
+
+```
+1. POST /api/companies/provision
+   ├── Validate input
+   ├── Generate company ID & slug
+   ├── Create database record (status: provisioning)
+   ├── Render Terraform template
+   ├── Queue provision job
+   └── Return job ID
+
+2. Queue Worker picks up job
+   ├── Initialize Terraform workspace
+   ├── Run terraform plan
+   ├── Run terraform apply
+   ├── Parse outputs
+   ├── Update database with resources
+   ├── Update company status (active/failed)
+   └── Send notifications
+```
+
+### 4.2 Sample API Request/Response
+
+```json
+// POST /api/companies/provision
+{
+  "name": "ACME Corporation",
+  "environment": "production",
+  "config": {
+    "azure_region": "Southeast Asia",
+    "vnet_cidr": "10.1.0.0/16",
+    "api_container_image": "acme/api:latest",
+    "web_container_image": "acme/web:latest",
+    "db_admin_username": "acmeadmin"
+  }
+}
+
+// Response
+{
+  "company_id": "uuid-here",
+  "job_id": "job-uuid-here", 
+  "status": "provisioning",
+  "estimated_completion": "2025-06-30T10:30:00Z"
+}
+```
+
+## 5. Security & Best Practices
+
+### 5.1 Security
+- **Azure Service Principal** với least privilege permissions
+- **Key Vault** để lưu secrets (DB passwords, API keys)
+- **Network isolation** giữa các tenants
+- **Resource naming convention** để tránh conflicts
+- **RBAC** cho management interface
+
+### 5.2 Monitoring & Logging
+- **Application Insights** cho application monitoring
+- **Azure Monitor** cho infrastructure metrics
+- **Log Analytics** cho centralized logging
+- **Health checks** cho provisioned resources
+
+### 5.3 Cost Management
+- **Resource tagging** theo company
+- **Azure Cost Management** integration
+- **Resource quotas** và limits
+- **Auto-shutdown** cho dev environments
+
+## 6. Deployment Strategy
+
+### 6.1 Management Infrastructure
+```yaml
+# Azure resources for management system
+- Resource Group: management-rg
+- App Service Plan: management-plan
+- Web App: management-web
+- API App: management-api  
+- PostgreSQL: management-db
+- Storage Account: terraform-states
+- Key Vault: management-kv
+- Service Bus: management-queue
+```
+
+### 6.2 CI/CD Pipeline
+- **Infrastructure Code**: GitOps với Azure DevOps/GitHub Actions
+- **Application Code**: Separate pipelines cho web/api
+- **Terraform Modules**: Versioning và testing
+- **Security Scanning**: Container images và Terraform plans
+
+Kiến trúc này cho phép bạn tạo và quản lý infrastructure cho nhiều companies một cách tự động, scalable và secure. Bạn có muốn tôi detail hóa thêm phần nào không?
+
+
+
+terraform-modules/
+├── main.tf                    # Root module chính
+├── variables.tf               # Input variables
+├── outputs.tf                 # Output values  
+├── versions.tf                # Provider versions & backend config
+├── terraform.tfvars.example   # Example variables file
+├── modules/
+│   ├── networking/            # VNet, Subnets, NAT Gateway, NSG
+│   │   ├── main.tf
+│   │   ├── variables.tf
+│   │   └── outputs.tf
+│   ├── database/              # PostgreSQL Flexible Server
+│   │   ├── main.tf
+│   │   ├── variables.tf
+│   │   └── outputs.tf
+│   ├── storage/               # Blob Storage với containers
+│   │   ├── main.tf
+│   │   ├── variables.tf
+│   │   └── outputs.tf
+│   ├── ai/                    # Azure Cognitive Services
+│   │   ├── main.tf
+│   │   ├── variables.tf
+│   │   └── outputs.tf
+│   ├── compute/               # Container Apps (API + Web)
+│   │   ├── main.tf
+│   │   ├── variables.tf
+│   │   └── outputs.tf        # ✅ Đã thêm outputs.tf
+│   └── cdn/                   # Azure CDN
+│       ├── main.tf
+│       ├── variables.tf
+│       └── outputs.tf
+└── templates/
+    └── company.tf.j2          # Jinja2 template cho dynamic provisioning
+
+
+
+    Các tính năng chính đã implement:
+1. Networking Module
+
+VNet với 2 subnets (public/private)
+NAT Gateway cho outbound internet
+Network Security Groups
+Subnet delegation cho Container Apps
+
+2. Database Module
+
+PostgreSQL Flexible Server trong private subnet
+Database tự động tạo theo naming convention
+Firewall rules cho Azure services
+
+3. Storage Module
+
+Storage Account với 3 containers:
+
+app-data (private)
+public-assets (public blob access)
+backups (private)
+
+
+CORS configuration
+
+4. AI Services Module
+
+Azure Cognitive Services multi-service account
+S0 pricing tier
+
+5. Compute Module (đã có outputs.tf)
+
+Container Apps Environment
+API Container App với environment variables
+Web Container App
+Secrets management cho database, storage, AI keys
+Auto-scaling configuration
+
+6. CDN Module
+
+CDN Profile với 2 endpoints:
+
+Web app caching
+Static assets caching
+
+
+HTTPS enforcement rules
+
+7. Security & Best Practices
+
+Key Vault cho secrets storage
+Resource tagging consistency
+Random password generation
+Sensitive outputs marking
+Remote state backend configuration
+
+8. Template System
+
+Jinja2 template cho dynamic company provisioning
+Variable substitution
+Backend configuration per company
+
+Bạn có thể sử dụng modules này bằng cách:
+
+Direct usage: terraform apply với terraform.tfvars
+Template-based: Render template với company data rồi chạy terraform
+API integration: Call từ management API để provision infrastructure

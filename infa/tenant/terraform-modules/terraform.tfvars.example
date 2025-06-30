@@ -1,0 +1,19 @@
+# Company Information
+company_name = "ACME Corporation"
+company_slug = "acme-corp"
+environment  = "prod"
+
+# Azure Configuration
+azure_region = "Southeast Asia"
+
+# Network Configuration
+vnet_cidr           = "10.0.0.0/16"
+public_subnet_cidr  = "10.0.1.0/24"
+private_subnet_cidr = "10.0.2.0/24"
+
+# Database Configuration
+db_admin_username = "dbadmin"
+
+# Container Images
+api_container_image = "your-registry.azurecr.io/acme/api:latest"
+web_container_image = "your-registry.azurecr.io/acme/web:latest"

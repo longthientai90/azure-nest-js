@@ -1,0 +1,25 @@
+# Terraform Variables for {{ company_name }}
+# Generated at: {{ timestamp }}
+# Company: {{ company_name }}
+# Slug: {{ company_slug }}
+# Environment: {{ environment }}
+
+# Company Information
+company_name = "{{ company_name }}"
+company_slug = "{{ company_slug }}"
+environment  = "{{ environment }}"
+
+# Azure Configuration
+azure_region = "{{ azure_region }}"
+
+# Network Configuration
+vnet_cidr           = "{{ vnet_cidr }}"
+public_subnet_cidr  = "{{ public_subnet_cidr }}"
+private_subnet_cidr = "{{ private_subnet_cidr }}"
+
+# Database Configuration
+db_admin_username = "{{ db_admin_username }}"
+
+# Container Images
+api_container_image = "{{ api_container_image }}"
+web_container_image = "{{ web_container_image }}"
