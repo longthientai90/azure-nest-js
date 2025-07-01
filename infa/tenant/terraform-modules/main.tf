@@ -77,6 +77,7 @@ module "networking" {
 
 # Database Module
 module "database" {
+  count  = var.enable_database ? 1 : 0
   source = "./modules/database"
 
   company_slug        = var.company_slug
@@ -104,6 +105,7 @@ module "storage" {
 
 # AI Services Module
 module "ai_services" {
+  count  = var.enable_ai_services ? 1 : 0
   source = "./modules/ai"
 
   company_slug        = var.company_slug
@@ -147,6 +149,7 @@ module "compute" {
 
 # CDN Module
 module "cdn" {
+  count  = var.enable_cdn_services ? 1 : 0
   source = "./modules/cdn"
 
   company_slug         = var.company_slug

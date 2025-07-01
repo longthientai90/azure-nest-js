@@ -57,3 +57,21 @@ variable "web_container_image" {
   description = "Web container image"
   type        = string
 }
+
+variable "enable_database" {
+  description = "Enable creation of database module"
+  type        = bool
+  default     = true
+}
+
+variable "enable_ai_services" {
+  description = "Enable creation of AI Services module"
+  type        = bool
+  default     = false
+}
+
+variable "enable_cdn_services" {
+  description = "Enable creation of cdn module"
+  type        = bool
+  default     = false
+}

@@ -21,33 +21,36 @@ def load_sample_companies():
             "public_subnet_cidr": "10.0.1.0/24",
             "private_subnet_cidr": "10.0.2.0/24",
             "db_admin_username": "dbadmin",
-            "api_container_image": "your-registry.azurecr.io/acme/api:latest",
-            "web_container_image": "your-registry.azurecr.io/acme/web:latest"
+            "api_container_image": "kennethreitz/httpbin",
+            "web_container_image": "nginx:latest",
+            "enable_database": "false",
+            "enable_ai_services": "false",
+            "enable_cdn_services": "false",
         },
-        {
-            "company_name": "XYZ Technologies",
-            "company_slug": "xyz-tech",
-            "environment": "staging",
-            "azure_region": "East US",
-            "vnet_cidr": "10.1.0.0/16",
-            "public_subnet_cidr": "10.1.1.0/24",
-            "private_subnet_cidr": "10.1.2.0/24",
-            "db_admin_username": "xyzadmin",
-            "api_container_image": "xyz-registry.azurecr.io/xyz/api:v2.1.0",
-            "web_container_image": "xyz-registry.azurecr.io/xyz/web:v2.1.0"
-        },
-        {
-            "company_name": "Microsoft Corporation",
-            "company_slug": "microsoft-corp",
-            "environment": "prod",
-            "azure_region": "West US 2",
-            "vnet_cidr": "10.2.0.0/16",
-            "public_subnet_cidr": "10.2.1.0/24",
-            "private_subnet_cidr": "10.2.2.0/24",
-            "db_admin_username": "msadmin",
-            "api_container_image": "microsoft.azurecr.io/ms/api:latest",
-            "web_container_image": "microsoft.azurecr.io/ms/web:latest"
-        }
+        # {
+        #     "company_name": "XYZ Technologies",
+        #     "company_slug": "xyz-tech",
+        #     "environment": "staging",
+        #     "azure_region": "East US",
+        #     "vnet_cidr": "10.1.0.0/16",
+        #     "public_subnet_cidr": "10.1.1.0/24",
+        #     "private_subnet_cidr": "10.1.2.0/24",
+        #     "db_admin_username": "xyzadmin",
+        #     "api_container_image": "xyz-registry.azurecr.io/xyz/api:v2.1.0",
+        #     "web_container_image": "xyz-registry.azurecr.io/xyz/web:v2.1.0"
+        # },
+        # {
+        #     "company_name": "Microsoft Corporation",
+        #     "company_slug": "microsoft-corp",
+        #     "environment": "prod",
+        #     "azure_region": "West US 2",
+        #     "vnet_cidr": "10.2.0.0/16",
+        #     "public_subnet_cidr": "10.2.1.0/24",
+        #     "private_subnet_cidr": "10.2.2.0/24",
+        #     "db_admin_username": "msadmin",
+        #     "api_container_image": "microsoft.azurecr.io/ms/api:latest",
+        #     "web_container_image": "microsoft.azurecr.io/ms/web:latest"
+        # }
     ]
 
 

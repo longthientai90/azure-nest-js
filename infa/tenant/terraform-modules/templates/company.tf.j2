@@ -97,9 +97,28 @@ variable "web_container_image" {
   default     = "{{ web_container_image }}"
 }
 
+variable "enable_database" {
+  description = "enable database"
+  type        = bool
+  default     = "{{ enable_database }}"
+}
+
+variable "enable_ai_services" {
+  description = "enable ai services"
+  type        = bool
+  default     = "{{ enable_ai_services }}"
+}
+
+variable "enable_cdn_services" {
+  description = "enable cdn services"
+  type        = bool
+  default     = "{{ enable_cdn_services }}"
+}
+
+
 # Include the main module
 module "company_infrastructure" {
-  source = "../../"
+  source = "../../../terraform-modules"
   
   company_name         = var.company_name
   company_slug         = var.company_slug
@@ -111,6 +130,9 @@ module "company_infrastructure" {
   db_admin_username   = var.db_admin_username
   api_container_image = var.api_container_image
   web_container_image = var.web_container_image
+  enable_database      = var.enable_database
+  enable_ai_services   = var.enable_ai_services
+  enable_cdn_services  = var.enable_cdn_services
 }
 
 # Outputs

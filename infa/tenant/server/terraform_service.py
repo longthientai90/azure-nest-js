@@ -5,6 +5,9 @@ import uuid
 from datetime import datetime
 from pathlib import Path
 
+from dotenv import load_dotenv
+load_dotenv()
+
 
 class TerraformService:
     def __init__(self, template_dir="../terraform-modules/templates", workspace_dir="terraform-workspaces"):
