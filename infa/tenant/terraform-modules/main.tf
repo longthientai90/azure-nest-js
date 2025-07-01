@@ -127,8 +127,8 @@ module "compute" {
   subnet_id           = module.networking.private_subnet_id
 
   # Database connection
-  database_host     = module.database.fqdn
-  database_name     = module.database.database_name
+  database_host     = var.enable_database ? module.database[0].fqdn : ""
+  database_name     = var.enable_database ? module.database[0].database_name : ""
   database_username = var.db_admin_username
   database_password = random_password.db_password.result
 
@@ -137,8 +137,8 @@ module "compute" {
   storage_account_key  = module.storage.storage_account_key
 
   # AI Services connection
-  ai_services_endpoint = module.ai_services.endpoint
-  ai_services_key      = module.ai_services.primary_access_key
+  ai_services_endpoint = var.enable_ai_services ? module.ai_services[0].endpoint : ""
+  ai_services_key      = var.enable_ai_services ? module.ai_services[0].primary_access_key : ""
 
   # Container images
   api_image = var.api_container_image

@@ -25,13 +25,13 @@ output "private_subnet_id" {
 
 output "database_fqdn" {
   description = "FQDN of the PostgreSQL server"
-  value       = module.database.fqdn
+  value       = length(module.database) > 0 ? module.database[0].fqdn : ""
   sensitive   = true
 }
 
 output "database_name" {
   description = "Name of the database"
-  value       = module.database.database_name
+  value       = length(module.database) > 0 ? module.database[0].database_name : ""
 }
 
 output "storage_account_name" {
@@ -46,7 +46,7 @@ output "blob_storage_url" {
 
 output "ai_services_endpoint" {
   description = "AI Services endpoint"
-  value       = module.ai_services.endpoint
+  value       = length(module.ai_services) > 0 ? module.ai_services[0].endpoint : ""
   sensitive   = true
 }
 
@@ -62,7 +62,7 @@ output "web_app_url" {
 
 output "cdn_endpoint_url" {
   description = "CDN endpoint URL"
-  value       = module.cdn.endpoint_url
+  value       = length(module.cdn) > 0 ? module.cdn[0].endpoint_url : ""
 }
 
 output "key_vault_id" {

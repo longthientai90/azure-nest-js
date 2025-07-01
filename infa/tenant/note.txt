@@ -8,3 +8,66 @@ Dự án của tôi như sau
 Theo tôi hiểu thì khi user click trên web quảng lý thì call api, truyền vào các thông tin rồi chạy terraform. sau khi chạy xong terraform cần lưu lại các thông tin output
 
 bạn có thể thiết kế kiến trúc cho tôi được không
+
+
+
+DL-1078, DL-1101: content too large -> devops
+DL-1037: bad gateway -> devops
+
+Dự án của tôi như sau
+1.tạo cơ sở hạ tầng cho nhiều công ty trên azure, kiểu multi tenant độc lập về mặt vật lý, sử dụng terraform 
+2.có 1 ứng web, khi click vào button thì sẽ tạo hạ tầng cho một công ty
+3.hạ tầng của một công ty bao gồm: 
+- 1 app container chạy api, 1 container chạy web
+- 1 azure postgresql, 1 blob storage, 1 Azure AI, 1 cdn
+- 1 vpc, 2 subnet (1 public, 1 private), 1 nat (đính kèm vào public subnet)
+Theo tôi hiểu thì khi user click trên web quảng lý thì call api, truyền vào các thông tin rồi chạy terraform. sau khi chạy xong terraform cần lưu lại các thông tin output
+
+
+nếu tôi chạy terraform plan -var-file="terraform.tfvars" -out=terraform.tfplan  thì trong file output thì tôi dựa vào thông tin nào để biết không có vấn đề,
+
+flow của tôi dự định là, tôi sẽ có một file sh, trong đó
+- 
+- có 1 file script 
+
+tôi định tự động flow 
+setp 1: truyền các parameter rồi chạy main.py để tạo ra file template cho một công ty
+step 2: sau khi tạo file template thành công xong thì terraform plan để kiểm tra template có vấn đề gì không ?
+nếu không có vấn đề gì chuyển sang step 3
+step 3: terraform apply để tạo infra, sau khi tạo infra xong thì cần đọc output để gọi API cập nhật vào database
+
+vậy tôi nên tạo 1 file sh nhỉ
+
+#!/bin/bash
+
+# Step 1: Tạo file template Terraform cho công ty
+python main.py --company_name "ACME Corporation" --company_slug "acme-corp" --environment "prod" \
+  --azure_region "Southeast Asia" --vnet_cidr "10.0.0.0/16" --public_subnet_cidr "10.0.1.0/24" \
+  --private_subnet_cidr "10.0.2.0/24" --db_admin_username "dbadmin" \
+  --api_container_image "kennethreitz/httpbin" --web_container_image "nginx:latest" \
+  --enable_database true --enable_ai_services false --enable_cdn_services false
+
+# Step 2: Di chuyển vào workspace công ty vừa tạo (ví dụ: acme-corp)
+cd terraform-workspaces/acme-corp
+
+# Step 3: Kiểm tra template với terraform plan
+terraform init
+terraform plan -var-file="terraform.tfvars" -out=tfplan
+if [ $? -ne 0 ]; then
+  echo "❌ Terraform plan failed. Check your template."
+  exit 1
+fi
+
+# Step 4: Apply để tạo infra
+terraform apply -auto-approve tfplan
+if [ $? -ne 0 ]; then
+  echo "❌ Terraform apply failed."
+  exit 1
+fi
+
+# Step 5: Đọc output và gọi API cập nhật database
+output_json=$(terraform output -json)
+# Gọi API cập nhật database ở đây, ví dụ:
+# curl -X POST -H "Content-Type: application/json" -d "$output_json" http://your-api/infra/update
+
+echo "✅ Provisioning completed!"
