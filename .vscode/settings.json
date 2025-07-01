@@ -13,7 +13,11 @@
   "singleQuote": false,
   "eslint.enable": false,
   "cSpell.words": [
+    "cmic",
+    "containerapp",
+    "containerapps",
     "eastus",
+    "privatelink",
     "vnet",
     "zenblog"
   ]

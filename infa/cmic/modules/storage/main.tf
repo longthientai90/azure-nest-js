@@ -1,9 +1,5 @@
 # Storage module
 
-variable "resource_group_name" { type = string }
-variable "location" { type = string }
-variable "environment_name" { type = string }
-
 resource "random_string" "storage_suffix" {
   length  = 4
   special = false
@@ -38,11 +34,4 @@ resource "azurerm_storage_container" "nginx_config" {
   name                  = "nginx-config"
   storage_account_name  = azurerm_storage_account.main.name
   container_access_type = "blob"
-}
-
-output "storage_account_name" {
-  value = azurerm_storage_account.main.name
-}
-output "storage_account_id" {
-  value = azurerm_storage_account.main.id
 }

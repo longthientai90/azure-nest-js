@@ -1,9 +1,5 @@
 # Postgres module
 
-variable "resource_group_name" { type = string }
-variable "location" { type = string }
-variable "environment_name" { type = string }
-
 resource "random_string" "db_suffix" {
   length  = 4
   special = false
@@ -23,11 +19,4 @@ resource "azurerm_postgresql_flexible_server" "main" {
   administrator_password       = "P@ssw0rd123!"
   zone                         = "1"
   # Các thuộc tính subnet và private DNS sẽ truyền từ ngoài vào nếu cần
-}
-
-output "postgres_fqdn" {
-  value = azurerm_postgresql_flexible_server.main.fqdn
-}
-output "postgres_id" {
-  value = azurerm_postgresql_flexible_server.main.id
 }
