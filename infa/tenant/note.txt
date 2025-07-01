@@ -1,0 +1,10 @@
+Dự án của tôi như sau 
+1.tạo cơ sở hạ tầng cho nhiều công ty trên azure, kiểu multi tenant độc lập về mặt vật lý, sử dụng terraform 
+2.có 1 ứng web, khi click vào button thì sẽ tạo hạ tầng cho một công ty 
+3.hạ tầng của một công ty bao gồm: 
+- 1 app container chạy api, 1 container chạy web 
+- 1 azure postgresql, 1 blob storage, 1 Azure AI, 1 cdn 
+- 1 vpc, 2 subnet (1 public, 1 private), 1 nat (đính kèm vào public subnet) 
+Theo tôi hiểu thì khi user click trên web quảng lý thì call api, truyền vào các thông tin rồi chạy terraform. sau khi chạy xong terraform cần lưu lại các thông tin output
+
+bạn có thể thiết kế kiến trúc cho tôi được không

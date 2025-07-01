@@ -64,3 +64,5 @@ infa/terraform/.terraform.lock.hcl
 infa/terraform/.terraform.tfstate.lock.info
 /infa/tenant/server/venv
 /infa/tenant/server/__pycache__
+*.hcl
+/infa/tenant/server/terraform-workspaces
