@@ -1,33 +1,3 @@
-variable "resource_group_name" {
-  description = "Name of the resource group"
-  type        = string
-}
-
-variable "location" {
-  description = "Azure region"
-  type        = string
-}
-
-variable "vnet_id" {
-  description = "ID of existing VNet"
-  type        = string
-}
-
-variable "vnet_name" {
-  description = "Name of existing VNet"
-  type        = string
-}
-
-variable "vnet_address_space" {
-  description = "Address space of existing VNet"
-  type        = string
-}
-
-variable "environment" {
-  description = "Environment name"
-  type        = string
-}
-
 # Calculate subnet addresses dynamically
 locals {
   # Parse the VNet CIDR to get base network
@@ -38,8 +8,8 @@ locals {
   base_octets  = split(".", split("/", local.vnet_cidr)[0])
   base_network = "${local.base_octets[0]}.${local.base_octets[1]}"
 
-  container_app_subnet_cidr    = "${local.base_network}.10.0/24"
-  private_endpoint_subnet_cidr = "${local.base_network}.11.0/24"
+  container_app_subnet_cidr    = "${local.base_network}.10.0/23"
+  private_endpoint_subnet_cidr = "${local.base_network}.12.0/23"
 }
 
 # Subnet for Container Apps
@@ -130,23 +100,4 @@ resource "azurerm_subnet_network_security_group_association" "private_endpoint" 
   network_security_group_id = azurerm_network_security_group.private_endpoint.id
 }
 
-# modules/networking/outputs.tf
-output "container_app_subnet_id" {
-  description = "ID of the container app subnet"
-  value       = azurerm_subnet.container_app.id
-}
-
-output "private_endpoint_subnet_id" {
-  description = "ID of the private endpoint subnet"
-  value       = azurerm_subnet.private_endpoint.id
-}
-
-output "container_app_subnet_name" {
-  description = "Name of the container app subnet"
-  value       = azurerm_subnet.container_app.name
-}
-
-output "private_endpoint_subnet_name" {
-  description = "Name of the private endpoint subnet"
-  value       = azurerm_subnet.private_endpoint.name
-}
+# Đã tách biến và outputs sang file variables.tf và outputs.tf, chỉ giữ lại resource và local trong main.tf
