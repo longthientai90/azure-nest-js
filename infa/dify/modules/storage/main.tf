@@ -27,12 +27,13 @@ resource "azurerm_storage_account" "main" {
   }
 
   # Disable public access
-  public_network_access_enabled = false
+  public_network_access_enabled = true
 
   # Enable private endpoint only access
   network_rules {
-    default_action = "Deny"
+    default_action = "Allow"
     bypass         = ["AzureServices"]
+    ip_rules       = ["210.245.54.242"] # Thêm IP của bạn vào đây
   }
 
   tags = {
@@ -41,12 +42,28 @@ resource "azurerm_storage_account" "main" {
   }
 }
 
+resource "null_resource" "wait_for_storage" {
+  depends_on = [azurerm_storage_account.main]
+  provisioner "local-exec" {
+    command = "sleep 60" # Wait for storage account to be fully provisioned
+  }
+}
+
+data "azurerm_client_config" "current" {}
+
+resource "azurerm_role_assignment" "blob_data" {
+  scope                = azurerm_storage_account.main.id
+  role_definition_name = "Storage Blob Data Contributor"
+  principal_id         = data.azurerm_client_config.current.object_id
+  depends_on           = [azurerm_storage_account.main]
+}
+
 # Blob Container
 resource "azurerm_storage_container" "main" {
   name                  = "data"
   storage_account_name  = azurerm_storage_account.main.name
   container_access_type = "private"
-  depends_on            = [azurerm_storage_account.main]
+  depends_on            = [azurerm_storage_account.main, null_resource.wait_for_storage, azurerm_role_assignment.blob_data]
 }
 
 # Private DNS Zone for Blob Storage
