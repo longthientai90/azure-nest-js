@@ -25,12 +25,13 @@ variable "location" {
 }
 
 variable "vnet_name" {
-  description = "Name of existing VNet"
+  description = "Name of the VNet"
   type        = string
+  default     = "vnet-containerapp-demo"
 }
 
-variable "vnet_resource_group_name" {
-  description = "Resource group name of existing VNet"
+variable "vnet_address_space" {
+  description = "Address space for the VNet (CIDR block)"
   type        = string
 }
 
@@ -40,16 +41,18 @@ variable "environment" {
   default     = "dev"
 }
 
-# Data source for existing VNet
-data "azurerm_virtual_network" "existing" {
-  name                = var.vnet_name
-  resource_group_name = var.vnet_resource_group_name
-}
-
 # Resource Group
 resource "azurerm_resource_group" "main" {
   name     = var.resource_group_name
   location = var.location
+}
+
+# Create Virtual Network
+resource "azurerm_virtual_network" "main" {
+  name                = var.vnet_name
+  address_space       = [var.vnet_address_space]
+  location            = azurerm_resource_group.main.location
+  resource_group_name = azurerm_resource_group.main.name
 }
 
 # Log Analytics Workspace for Container Apps
@@ -67,11 +70,10 @@ module "networking" {
 
   resource_group_name = azurerm_resource_group.main.name
   location            = azurerm_resource_group.main.location
-  vnet_id             = data.azurerm_virtual_network.existing.id
-  vnet_name           = data.azurerm_virtual_network.existing.name
-  vnet_address_space  = data.azurerm_virtual_network.existing.address_space[0]
+  vnet_id             = azurerm_virtual_network.main.id
+  vnet_name           = azurerm_virtual_network.main.name
+  vnet_address_space  = var.vnet_address_space
   environment         = var.environment
-  virtual_network_id  = data.azurerm_virtual_network.existing.id
 }
 
 # Storage Module
@@ -106,12 +108,10 @@ module "database" {
   environment                = var.environment
   resource_group_name        = azurerm_resource_group.main.name
   location                   = azurerm_resource_group.main.location
-  admin_username             = "psqladminuser"
-  admin_password             = var.db_admin_password
+  admin_username             = "psqladminuser"       # Thay bằng giá trị thực tế hoặc biến
+  admin_password             = var.db_admin_password # Nên khai báo biến này ở file tfvars hoặc secrets
   private_endpoint_subnet_id = module.networking.private_endpoint_subnet_id
   private_dns_zone_id        = module.networking.private_dns_zone_id
-  private_dns_zone_name      = module.networking.private_dns_zone_name
-  virtual_network_id         = data.azurerm_virtual_network.existing.id
 
   depends_on = [module.networking]
 }

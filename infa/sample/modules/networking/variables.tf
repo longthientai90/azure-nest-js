@@ -27,8 +27,3 @@ variable "environment" {
   description = "Environment name"
   type        = string
 }
-
-variable "virtual_network_id" {
-  description = "ID của Virtual Network để link DNS zone"
-  type        = string
-}

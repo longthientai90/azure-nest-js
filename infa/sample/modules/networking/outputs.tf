@@ -22,7 +22,3 @@ output "private_dns_zone_id" {
   description = "ID của Private DNS Zone cho PostgreSQL Flexible Server"
   value       = azurerm_private_dns_zone.postgres.id
 }
-
-output "private_dns_zone_name" {
-  value = azurerm_private_dns_zone.postgres.name
-}

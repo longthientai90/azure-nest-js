@@ -33,13 +33,3 @@ variable "private_dns_zone_id" {
   description = "ID của Private DNS Zone cho PostgreSQL Flexible Server"
   type        = string
 }
-
-variable "private_dns_zone_name" {
-  description = "Tên của Private DNS Zone cho PostgreSQL"
-  type        = string
-}
-
-variable "virtual_network_id" {
-  description = "ID của Virtual Network để link DNS zone"
-  type        = string
-}

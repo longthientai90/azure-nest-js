@@ -38,4 +38,11 @@ resource "azurerm_private_endpoint" "main" {
   }
 }
 
-# Đã di chuyển resource azurerm_private_dns_zone_virtual_network_link sang module networking
+output "postgresql_fqdn" {
+  value = azurerm_postgresql_flexible_server.main.fqdn
+}
+
+output "postgresql_connection_string" {
+  value     = "postgresql://${var.admin_username}:${var.admin_password}@${azurerm_postgresql_flexible_server.main.fqdn}:5432/appdb?sslmode=require"
+  sensitive = true
+}
