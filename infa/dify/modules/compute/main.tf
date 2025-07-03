@@ -2,7 +2,7 @@
 
 # Container App Environment
 resource "azurerm_container_app_environment" "main" {
-  name                       = "cae-${var.environment}"
+  name                       = "cae-${var.environment}-1"
   location                   = var.location
   resource_group_name        = var.resource_group_name
   log_analytics_workspace_id = var.log_analytics_workspace_id
@@ -60,6 +60,10 @@ resource "azurerm_container_app" "api" {
       env {
         name  = "STORAGE_CONNECTION_STRING"
         value = var.storage_connection_string
+      }
+      env {
+        name  = "POSTGRES_CONNECTION_STRING"
+        value = var.postgres_connection_string
       }
     }
     min_replicas = 1

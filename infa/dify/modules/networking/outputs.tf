@@ -17,3 +17,8 @@ output "private_endpoint_subnet_name" {
   description = "Name of the private endpoint subnet"
   value       = azurerm_subnet.private_endpoint.name
 }
+
+output "private_dns_zone_id" {
+  description = "ID của Private DNS Zone cho PostgreSQL Flexible Server"
+  value       = azurerm_private_dns_zone.postgres.id
+}

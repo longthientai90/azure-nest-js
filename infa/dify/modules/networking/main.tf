@@ -100,4 +100,8 @@ resource "azurerm_subnet_network_security_group_association" "private_endpoint" 
   network_security_group_id = azurerm_network_security_group.private_endpoint.id
 }
 
-# Đã tách biến và outputs sang file variables.tf và outputs.tf, chỉ giữ lại resource và local trong main.tf
+# Resource for Private DNS Zone for PostgreSQL
+resource "azurerm_private_dns_zone" "postgres" {
+  name                = "privatelink.postgres.database.azure.com"
+  resource_group_name = var.resource_group_name
+}

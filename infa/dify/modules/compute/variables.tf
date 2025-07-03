@@ -30,3 +30,9 @@ variable "storage_connection_string" {
   type        = string
   default     = ""
 }
+
+variable "postgres_connection_string" {
+  description = "Kết nối PostgreSQL cho container app API"
+  type        = string
+  sensitive   = true
+}

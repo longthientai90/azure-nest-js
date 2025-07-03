@@ -48,3 +48,10 @@ variable "storage_allowed_ip_rules" {
   type        = list(string)
   default     = []
 }
+
+variable "db_admin_password" {
+  description = "Mật khẩu admin cho PostgreSQL"
+  type        = string
+  sensitive   = true
+  default     = "Abc@12345"
+}
