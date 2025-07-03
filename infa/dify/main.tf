@@ -86,13 +86,13 @@ module "storage" {
 }
 
 # Compute module
-# module "compute" {
-#   source = "./modules/compute"
+module "compute" {
+  source = "./modules/compute"
 
-#   environment                = var.environment
-#   resource_group_name        = azurerm_resource_group.main.name
-#   location                   = azurerm_resource_group.main.location
-#   log_analytics_workspace_id = azurerm_log_analytics_workspace.main.id
-#   container_app_subnet_id    = module.networking.container_app_subnet_id
-#   storage_connection_string  = module.storage.connection_string
-# }
+  environment                = var.environment
+  resource_group_name        = azurerm_resource_group.main.name
+  location                   = azurerm_resource_group.main.location
+  log_analytics_workspace_id = azurerm_log_analytics_workspace.main.id
+  container_app_subnet_id    = module.networking.container_app_subnet_id
+  storage_connection_string  = module.storage.connection_string
+}

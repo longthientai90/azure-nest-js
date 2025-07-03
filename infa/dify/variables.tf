@@ -42,3 +42,9 @@ variable "scaling_config" {
     })
   })
 }
+
+variable "storage_allowed_ip_rules" {
+  description = "List of IPs allowed to access storage account (for firewall rules)"
+  type        = list(string)
+  default     = []
+}

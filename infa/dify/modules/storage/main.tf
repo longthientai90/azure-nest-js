@@ -33,7 +33,7 @@ resource "azurerm_storage_account" "main" {
   network_rules {
     default_action = "Allow"
     bypass         = ["AzureServices"]
-    ip_rules       = ["210.245.54.242"] # Thêm IP của bạn vào đây
+    ip_rules       = ["210.245.54.242"] # Add your IP here
   }
 
   tags = {

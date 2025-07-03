@@ -7,6 +7,13 @@ resource "azurerm_container_app_environment" "main" {
   resource_group_name        = var.resource_group_name
   log_analytics_workspace_id = var.log_analytics_workspace_id
   infrastructure_subnet_id   = var.container_app_subnet_id
+
+  workload_profile {
+    name                  = "Consumption"
+    workload_profile_type = "Consumption"
+    maximum_count         = 10
+    minimum_count         = 0
+  }
 }
 
 # Container Apps

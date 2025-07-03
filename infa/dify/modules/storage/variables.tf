@@ -20,3 +20,9 @@ variable "environment" {
   description = "Environment name"
   type        = string
 }
+
+variable "storage_allowed_ip_rules" {
+  description = "List of allowed IP addresses for storage account"
+  type        = list(string)
+  default     = []
+}

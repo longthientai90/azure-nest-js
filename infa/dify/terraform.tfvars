@@ -39,3 +39,5 @@ scaling_config = {
     max_replicas = 3
   }
 }
+
+storage_allowed_ip_rules = ["210.245.54.242"]
